@@ -1,4 +1,4 @@
-﻿:root {
+:root {
     /* 00171f, 003459, fe5d9f, b5b5f1, and 0b6e4f */
     --c-primary: #00171f;     /* very dark blue */
     --c-secondary: #003459;   /* dark blue */
@@ -425,3 +425,81 @@ h3.signature {
     bottom: -15px;
     left: -20px;
 }
+
+/* Hardcoded tree picture layout moved from JS to CSS */
+.tree-pic-1 {
+    left: 270px;
+    top: 90px;
+    transform: rotate(-12deg);
+    z-index: 60;
+}
+
+.tree-pic-2 {
+    left: 410px;
+    top: 190px;
+    transform: rotate(18deg);
+    z-index: 61;
+}
+
+/* ==========================================
+   Responsive Design for Mobile & Small Screens
+   ========================================== */
+@media (max-width: 768px) {
+    /* Scale down base layout rem factors */
+    html {
+        font-size: 12px;
+    }
+
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 2.5rem; }
+    
+    /* Layout fixes */
+    #lemon { font-size: 5rem; }
+    #rasmalai-container { width: 140px; height: 140px; }
+    
+    /* Pictures */
+    .polaroid {
+        padding: 6px 6px 18px 6px;
+    }
+    .polaroid img {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .static-polaroid {
+        padding: 5px 5px 16px 5px;
+    }
+    .static-polaroid img {
+        width: 75px; 
+        height: 75px;
+    }
+    
+    /* Floating bounds logic keep-out overlap fix */
+    .prop-emoji { font-size: 320px; } /* Smaller tree */
+    
+    /* Reposition static pinned tree photos for smaller tree */
+    .tree-pic-1 {
+        left: 155px;
+        top: 50px;
+    }
+    .tree-pic-2 {
+        left: 240px;
+        top: 110px;
+    }
+}
+
+@media (max-width: 480px) {
+    html { font-size: 10px; }
+
+    .prop-emoji { font-size: 260px; }
+    
+    .tree-pic-1 {
+        left: 125px;
+        top: 40px;
+    }
+    .tree-pic-2 {
+        left: 195px;
+        top: 90px;
+    }
+}
+
