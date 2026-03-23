@@ -1,4 +1,4 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
     const picsContainer = document.getElementById("floating-pics-container");
     const treePicsDir = document.getElementById("tree-pics");
     
@@ -82,8 +82,13 @@
             isOverlapping = false;
 
             // Strict keep-out zone to avoid the bottom-left Tree completely!
+            // Adjust keep-out dynamically for mobile screens
+            const isMobile = window.innerWidth <= 768;
+            const keepOutLeft = isMobile ? 65 : 45; // Take up more relative vw on mobile
+            const keepOutTop = isMobile ? 65 : 50;  // Takes up less relative vh on mobile
+
             // Extended slightly to account for the image's own width and floating movement
-            if (randomLeft < 45 && randomTop > 50) {
+            if (randomLeft < keepOutLeft && randomTop > keepOutTop) {
                 isOverlapping = true;
                 attempts++;
                 continue;
@@ -168,20 +173,9 @@
         };
         polaroid.appendChild(img);
 
-        // Position them precisely on the Tree canopy (which is 550px wide/tall now)
-        // Spread them out fully to cover the large leafy area
-        if (index === 0) {
-            polaroid.style.left = "270px";
-            polaroid.style.top = "90px";
-            polaroid.style.transform = `rotate(-12deg)`;
-            polaroid.style.zIndex = "60";
-        } else {
-            polaroid.style.left = "410px";
-            polaroid.style.top = "190px";
-            polaroid.style.transform = `rotate(18deg)`;
-            polaroid.style.zIndex = "61";
-        }
-        
+        // Position them precisely using CSS classes!
+        polaroid.classList.add("tree-pic-" + (index + 1));
+
         treePicsDir.appendChild(polaroid);
     });
 
@@ -199,49 +193,60 @@
     let saltAmount = 0;
     const maxSalt = 100;
 
-    shaker.addEventListener("mousedown", (e) => {
-        isDragging = true;
-    });
+const startDrag = () => { isDragging = true; };
+    const stopDrag = () => { 
+        isDragging = false; 
+        shaker.style.transform = 'translate(-50%, 0) rotate(0deg)'; 
+    };
 
-    document.addEventListener("mouseup", () => {
-        isDragging = false;
-    });
+    shaker.addEventListener("mousedown", startDrag);
+    shaker.addEventListener("touchstart", (e) => {
+        startDrag();
+    }, { passive: true });
 
-    document.addEventListener("mousemove", (e) => {
+    document.addEventListener("mouseup", stopDrag);
+    document.addEventListener("touchend", stopDrag);
+
+    const handleMove = (clientX, clientY) => {
         if (!isDragging) return;
 
         const rect = interactionArea.getBoundingClientRect();
 
-        // Roughly follow mouse relative to the interaction container
-        shaker.style.left = (e.clientX - rect.left) + 'px';
-        shaker.style.top = (e.clientY - rect.top - 20) + 'px'; // offset so cursor holds the middle
+        // Roughly follow relative to the interaction container
+        shaker.style.left = (clientX - rect.left) + 'px';
+        shaker.style.top = (clientY - rect.top - 20) + 'px'; 
         shaker.style.transform = 'translate(-50%, -50%) rotate(-30deg)';
 
         // Drop salt if moving
         if (Math.random() > 0.5) {
-            dropSalt(e.clientX, e.clientY);
+            dropSalt(clientX, clientY);
         }
 
         // Check if cursor is over the lemon
         const lemonRect = lemon.getBoundingClientRect();
         if (
-            e.clientX >= lemonRect.left && e.clientX <= lemonRect.right &&
-            e.clientY >= lemonRect.top && e.clientY <= lemonRect.bottom
+            clientX >= lemonRect.left && clientX <= lemonRect.right &&
+            clientY >= lemonRect.top && clientY <= lemonRect.bottom
         ) {
             saltAmount += 1.5;
             progressBar.style.width = Math.min((saltAmount / maxSalt) * 100, 100) + '%';
-            
+
             if (saltAmount >= maxSalt) {
                 isDragging = false;
                 saltAmount = 0; // Prevent multi-trigger
-                setTimeout(() => goToPage(page2), 200); // reduced delay
+                setTimeout(() => goToPage(page2), 200); 
             }
         }
-    });
+    };
 
-    shaker.addEventListener("mouseup", () => {
-        shaker.style.transform = 'translate(-50%, 0) rotate(0deg)';
-    });
+    document.addEventListener("mousemove", (e) => handleMove(e.clientX, e.clientY));
+    document.addEventListener("touchmove", (e) => {
+        if (isDragging) {
+            e.preventDefault(); // crucial to prevent page scrolling while shaking
+            const touch = e.touches[0];
+            handleMove(touch.clientX, touch.clientY);
+        }
+    }, { passive: false });
 
     function dropSalt(x, y) {
         const grain = document.createElement('div');
